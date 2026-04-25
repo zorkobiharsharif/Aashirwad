@@ -19,14 +19,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, saved: false, previewOnly: true });
   }
 
-  const { error } = await supabase.from("media_assets").insert({
+  const mediaPayload = {
     title: payload.title,
     image_url: payload.image_url,
     alt_text: payload.alt_text,
     usage_type: payload.usage_type,
     category_slug: payload.category_slug,
     is_active: true
-  });
+  } as Record<string, unknown>;
+
+  const { error } = await (supabase as never)
+    .from("media_assets")
+    .insert(mediaPayload);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -54,7 +58,10 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: false, error: "Supabase not configured" }, { status: 500 });
   }
 
-  const { error } = await supabase.from("media_assets").update({ is_active: false }).eq("id", id);
+  const { error } = await (supabase as never)
+    .from("media_assets")
+    .update({ is_active: false } as Record<string, unknown>)
+    .eq("id", id);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

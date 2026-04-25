@@ -13,7 +13,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const { error } = await supabase.from("inquiries").insert(payload);
+  const { error } = await (supabase as never)
+    .from("inquiries")
+    .insert(payload as Record<string, unknown>);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
