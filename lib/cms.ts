@@ -1,6 +1,16 @@
 import { blogPostsSeed, business, offersSeed, reviewsSeed } from "@/lib/site-data";
 import { getSupabaseClient } from "@/lib/supabase";
 
+const homepageDefaults = {
+  heroEyebrow: "Since 1999 | One trusted store in Bihar Sharif",
+  heroTitle: "A premium family textile store for Bihar Sharif and nearby towns.",
+  heroDescription:
+    "Aashirwad brings sarees, bridal collection, ladies suits, shirting, and suiting together in one trusted store. Families visit from Bihar Sharif, Harnaut, Barbigha, Rajgir, Asthawan, Nalanda, Pawapuri, and nearby areas for dependable shopping and a warm in-store experience.",
+  legacyTitle: "A trusted store in Bihar Sharif.",
+  legacyDescription:
+    "Aashirwad has one physical store in Bihar Sharif, but customers come from many areas for wedding shopping, festive sarees, ladies suits, and dependable family service. That local trust is the real brand advantage, and this website is designed to turn it into more store visits and inquiries."
+};
+
 export async function getOffers() {
   const supabase = getSupabaseClient();
   if (!supabase) return offersSeed;
@@ -62,6 +72,35 @@ export async function getBlogPosts() {
     seoDescription: String(item.seo_description || item.excerpt || ""),
     content: [String(item.content || "")]
   }));
+}
+
+export async function getBlogPostBySlug(slug: string) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return blogPostsSeed.find((post) => post.slug === slug) || null;
+
+  const { data } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (!data) {
+    return blogPostsSeed.find((post) => post.slug === slug) || null;
+  }
+
+  return {
+    slug: String(data.slug || ""),
+    title: String(data.title || ""),
+    excerpt: String(data.excerpt || ""),
+    category: String(data.category || "Update"),
+    publishedAt: String(data.published_at || ""),
+    seoTitle: String(data.seo_title || data.title || ""),
+    seoDescription: String(data.seo_description || data.excerpt || ""),
+    content: String(data.content || "")
+      .split("\n\n")
+      .filter(Boolean)
+  };
 }
 
 export async function getRecentInquiries() {
@@ -153,4 +192,101 @@ export async function getSocialLinks(options?: { useServiceRole?: boolean }) {
     },
     { ...defaults }
   );
+}
+
+export async function getHomepageSettings(options?: { useServiceRole?: boolean }) {
+  const supabase = getSupabaseClient(options?.useServiceRole);
+  if (!supabase) return homepageDefaults;
+
+  const { data } = await supabase
+    .from("social_links")
+    .select("*")
+    .in("platform", [
+      "homepage_hero_eyebrow",
+      "homepage_hero_title",
+      "homepage_hero_description",
+      "homepage_legacy_title",
+      "homepage_legacy_description"
+    ])
+    .eq("is_active", true);
+
+  if (!data?.length) return homepageDefaults;
+
+  const map = new Map(data.map((item) => [String(item.platform), String(item.url || "")]));
+
+  return {
+    heroEyebrow: map.get("homepage_hero_eyebrow") || homepageDefaults.heroEyebrow,
+    heroTitle: map.get("homepage_hero_title") || homepageDefaults.heroTitle,
+    heroDescription:
+      map.get("homepage_hero_description") || homepageDefaults.heroDescription,
+    legacyTitle: map.get("homepage_legacy_title") || homepageDefaults.legacyTitle,
+    legacyDescription:
+      map.get("homepage_legacy_description") || homepageDefaults.legacyDescription
+  };
+}
+
+export async function getAdminOffers() {
+  const supabase = getSupabaseClient(true);
+  if (!supabase) return offersSeed.map((offer, index) => ({ id: `seed-offer-${index}`, ...offer }));
+
+  const { data } = await supabase
+    .from("offers")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  return (data || []).map((item) => ({
+    id: String(item.id || ""),
+    title: String(item.title || ""),
+    description: String(item.description || ""),
+    validity: String(item.validity || ""),
+    isActive: Boolean(item.is_active ?? true)
+  }));
+}
+
+export async function getAdminReviews() {
+  const supabase = getSupabaseClient(true);
+  if (!supabase) {
+    return reviewsSeed.map((review, index) => ({ id: `seed-review-${index}`, ...review, isApproved: true }));
+  }
+
+  const { data } = await supabase
+    .from("reviews")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  return (data || []).map((item) => ({
+    id: String(item.id || ""),
+    name: String(item.name || ""),
+    location: String(item.location || ""),
+    rating: Number(item.rating || 5),
+    text: String(item.review_text || ""),
+    isApproved: Boolean(item.is_approved ?? true)
+  }));
+}
+
+export async function getAdminBlogPosts() {
+  const supabase = getSupabaseClient(true);
+  if (!supabase) {
+    return blogPostsSeed.map((post) => ({ ...post, id: post.slug, isPublished: true }));
+  }
+
+  const { data } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  return (data || []).map((item) => ({
+    id: String(item.id || ""),
+    slug: String(item.slug || ""),
+    title: String(item.title || ""),
+    excerpt: String(item.excerpt || ""),
+    category: String(item.category || ""),
+    seoTitle: String(item.seo_title || ""),
+    seoDescription: String(item.seo_description || ""),
+    content: String(item.content || ""),
+    isPublished: Boolean(item.is_published ?? false)
+  }));
 }

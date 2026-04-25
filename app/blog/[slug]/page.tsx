@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getBlogPostBySlug } from "@/lib/cms";
 import { buildMetadata } from "@/lib/seo";
 import { blogPostsSeed } from "@/lib/site-data";
 
@@ -9,7 +10,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const post = blogPostsSeed.find((item) => item.slug === slug);
+  const post = await getBlogPostBySlug(slug);
 
   if (!post) {
     return buildMetadata({
@@ -31,7 +32,7 @@ export async function generateStaticParams() {
 
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
-  const post = blogPostsSeed.find((item) => item.slug === slug);
+  const post = await getBlogPostBySlug(slug);
 
   if (!post) notFound();
 

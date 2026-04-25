@@ -2,9 +2,22 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { DeleteMediaButton } from "@/components/admin/delete-media-button";
+import { BlogForm } from "@/components/admin/blog-form";
+import { HomepageForm } from "@/components/admin/homepage-form";
 import { MediaUploadForm } from "@/components/admin/media-upload-form";
+import { OffersForm } from "@/components/admin/offers-form";
+import { RecordDeleteButton } from "@/components/admin/record-delete-button";
+import { ReviewsForm } from "@/components/admin/reviews-form";
 import { SocialLinksForm } from "@/components/admin/social-links-form";
-import { getMediaAssets, getRecentInquiries, getSocialLinks } from "@/lib/cms";
+import {
+  getAdminBlogPosts,
+  getAdminOffers,
+  getAdminReviews,
+  getHomepageSettings,
+  getMediaAssets,
+  getRecentInquiries,
+  getSocialLinks
+} from "@/lib/cms";
 import { isAdminAuthenticated } from "@/lib/auth";
 
 export default async function AdminDashboardPage() {
@@ -17,6 +30,10 @@ export default async function AdminDashboardPage() {
   const inquiries = await getRecentInquiries();
   const mediaItems = await getMediaAssets({ limit: 12, useServiceRole: true });
   const socialLinks = await getSocialLinks({ useServiceRole: true });
+  const homepage = await getHomepageSettings({ useServiceRole: true });
+  const offers = await getAdminOffers();
+  const reviews = await getAdminReviews();
+  const blogPosts = await getAdminBlogPosts();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -93,20 +110,92 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            {[
-              ["Homepage", "Homepage text editing is the next owner-portal upgrade."],
-              ["Offers", "Offer management form is the next owner-portal upgrade."],
-              ["Reviews", "Review management form is the next owner-portal upgrade."],
-              ["Blog", "Blog management form is the next owner-portal upgrade."],
-              ["Categories", "Category text and cover-image editing is the next owner-portal upgrade."],
-              ["Inquiries", "Recent customer inquiries are already visible on the right side."]
-            ].map(([title, description]) => (
-              <div key={title} className="rounded-[1.8rem] border border-white/10 bg-white/5 p-6">
-                <h3 className="font-serif text-2xl text-brand-ivory">{title}</h3>
-                <p className="mt-3 text-sm leading-7 text-brand-ivory/72">{description}</p>
-              </div>
-            ))}
+          <div className="gold-border texture-panel rounded-[2rem] p-7">
+            <h2 className="font-serif text-3xl text-brand-ivory">Homepage content</h2>
+            <p className="mt-3 text-sm leading-7 text-brand-ivory/74">
+              Update the hero and legacy section copy used on the home page.
+            </p>
+            <div className="mt-6">
+              <HomepageForm initialValues={homepage} />
+            </div>
+          </div>
+
+          <div className="gold-border texture-panel rounded-[2rem] p-7">
+            <h2 className="font-serif text-3xl text-brand-ivory">Offers</h2>
+            <p className="mt-3 text-sm leading-7 text-brand-ivory/74">
+              Add festive campaigns, wedding season offers, and store highlights.
+            </p>
+            <div className="mt-6">
+              <OffersForm />
+            </div>
+            <div className="mt-6 grid gap-4">
+              {offers.map((offer) => (
+                <div key={offer.id} className="rounded-[1.6rem] border border-white/10 bg-black/20 p-5">
+                  <p className="font-semibold text-brand-ivory">{offer.title}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-brand-gold">{offer.validity}</p>
+                  <p className="mt-3 text-sm leading-7 text-brand-ivory/72">{offer.description}</p>
+                  {!offer.id.startsWith("seed-") ? (
+                    <div className="mt-4">
+                      <RecordDeleteButton endpoint="/api/admin/offers" id={offer.id} />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="gold-border texture-panel rounded-[2rem] p-7">
+            <h2 className="font-serif text-3xl text-brand-ivory">Reviews</h2>
+            <p className="mt-3 text-sm leading-7 text-brand-ivory/74">
+              Add real customer reviews and publish them to the live website.
+            </p>
+            <div className="mt-6">
+              <ReviewsForm />
+            </div>
+            <div className="mt-6 grid gap-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="rounded-[1.6rem] border border-white/10 bg-black/20 p-5">
+                  <p className="font-semibold text-brand-ivory">
+                    {review.name} | {review.location}
+                  </p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-brand-gold">
+                    Rating {review.rating}/5
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-brand-ivory/72">{review.text}</p>
+                  {!review.id.startsWith("seed-") ? (
+                    <div className="mt-4">
+                      <RecordDeleteButton endpoint="/api/admin/reviews" id={review.id} />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="gold-border texture-panel rounded-[2rem] p-7">
+            <h2 className="font-serif text-3xl text-brand-ivory">Blog posts</h2>
+            <p className="mt-3 text-sm leading-7 text-brand-ivory/74">
+              Publish new blog posts for wedding season, local SEO, and fresh arrivals.
+            </p>
+            <div className="mt-6">
+              <BlogForm />
+            </div>
+            <div className="mt-6 grid gap-4">
+              {blogPosts.map((post) => (
+                <div key={post.id} className="rounded-[1.6rem] border border-white/10 bg-black/20 p-5">
+                  <p className="font-semibold text-brand-ivory">{post.title}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-brand-gold">
+                    {post.slug} | {post.category}
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-brand-ivory/72">{post.excerpt}</p>
+                  {!String(post.id).startsWith("seed-") ? (
+                    <div className="mt-4">
+                      <RecordDeleteButton endpoint="/api/admin/blog" id={String(post.id)} />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

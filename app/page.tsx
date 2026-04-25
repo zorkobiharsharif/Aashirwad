@@ -3,7 +3,13 @@ import Image from "next/image";
 
 import { JsonLd } from "@/components/json-ld";
 import { Section } from "@/components/section";
-import { getBlogPosts, getMediaAssets, getOffers, getReviews } from "@/lib/cms";
+import {
+  getBlogPosts,
+  getHomepageSettings,
+  getMediaAssets,
+  getOffers,
+  getReviews
+} from "@/lib/cms";
 import { breadcrumbSchema } from "@/lib/seo";
 import {
   business,
@@ -15,11 +21,12 @@ import {
 } from "@/lib/site-data";
 
 export default async function HomePage() {
-  const [offers, reviews, posts, galleryImages] = await Promise.all([
+  const [offers, reviews, posts, galleryImages, homepage] = await Promise.all([
     getOffers(),
     getReviews(),
     getBlogPosts(),
-    getMediaAssets({ limit: 4 })
+    getMediaAssets({ limit: 4 }),
+    getHomepageSettings()
   ]);
 
   return (
@@ -31,16 +38,13 @@ export default async function HomePage() {
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-28">
           <div className="max-w-3xl">
             <p className="mb-4 text-sm uppercase tracking-[0.4em] text-brand-gold">
-              Since 1999 | One trusted store in Bihar Sharif
+              {homepage.heroEyebrow}
             </p>
             <h1 className="font-serif text-5xl leading-tight text-brand-ivory sm:text-6xl">
-              A premium family textile store for Bihar Sharif and nearby towns.
+              {homepage.heroTitle}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-brand-ivory/78">
-              Aashirwad brings sarees, bridal collection, ladies suits, shirting, and suiting
-              together in one trusted store. Families visit from Bihar Sharif, Harnaut, Barbigha,
-              Rajgir, Asthawan, Nalanda, Pawapuri, and nearby areas for dependable shopping and a
-              warm in-store experience.
+              {homepage.heroDescription}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <a
@@ -124,12 +128,9 @@ export default async function HomePage() {
       >
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="gold-border texture-panel rounded-[2rem] p-8">
-            <p className="font-serif text-4xl text-brand-ivory">A trusted store in Bihar Sharif.</p>
+            <p className="font-serif text-4xl text-brand-ivory">{homepage.legacyTitle}</p>
             <p className="mt-4 text-base leading-8 text-brand-ivory/75">
-              Aashirwad has one physical store in Bihar Sharif, but customers come from many areas
-              for wedding shopping, festive sarees, ladies suits, and dependable family service.
-              That local trust is the real brand advantage, and this website is designed to turn
-              it into more store visits and inquiries.
+              {homepage.legacyDescription}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
