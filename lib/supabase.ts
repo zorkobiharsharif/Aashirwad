@@ -2,16 +2,27 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
+type TableShape = {
+  Row: Record<string, Json>;
+  Insert: Record<string, Json>;
+  Update: Record<string, Json>;
+  Relationships: [];
+};
+
 export type Database = {
   public: {
     Tables: {
-      inquiries: { Row: Record<string, Json>; Insert: Record<string, Json> };
-      offers: { Row: Record<string, Json>; Insert: Record<string, Json> };
-      reviews: { Row: Record<string, Json>; Insert: Record<string, Json> };
-      blog_posts: { Row: Record<string, Json>; Insert: Record<string, Json> };
-      media_assets: { Row: Record<string, Json>; Insert: Record<string, Json> };
-      social_links: { Row: Record<string, Json>; Insert: Record<string, Json> };
+      inquiries: TableShape;
+      offers: TableShape;
+      reviews: TableShape;
+      blog_posts: TableShape;
+      media_assets: TableShape;
+      social_links: TableShape;
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };
 
