@@ -1,4 +1,6 @@
 import { InquiryForm } from "@/components/inquiry-form";
+import { SocialIcons } from "@/components/social-icons";
+import { getSocialLinks } from "@/lib/cms";
 import { buildMetadata } from "@/lib/seo";
 import { business } from "@/lib/site-data";
 
@@ -9,7 +11,9 @@ export const metadata = buildMetadata({
   path: "/contact"
 });
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const socialLinks = await getSocialLinks();
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
@@ -38,16 +42,8 @@ export default function ContactPage() {
               WhatsApp
             </a>
           </div>
-          <div className="mt-8 flex gap-5 text-sm text-brand-gold">
-            <a href={business.facebook} target="_blank" rel="noreferrer">
-              Facebook
-            </a>
-            <a href={business.instagram} target="_blank" rel="noreferrer">
-              Instagram
-            </a>
-            <a href={business.directionsUrl} target="_blank" rel="noreferrer">
-              Google Maps
-            </a>
+          <div className="mt-8">
+            <SocialIcons links={socialLinks} />
           </div>
         </div>
         <div className="grid gap-6">

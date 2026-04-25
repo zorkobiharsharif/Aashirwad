@@ -1,9 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { getSocialLinks } from "@/lib/cms";
 import { business, navLinks } from "@/lib/site-data";
+import { SocialIcons } from "@/components/social-icons";
 
-export function Header() {
+export async function Header() {
+  const socialLinks = await getSocialLinks();
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-brand-ink/90 backdrop-blur">
       <div className="bg-brand-red px-4 py-2 text-center text-xs text-white">
@@ -37,6 +41,9 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <div className="hidden lg:block">
+            <SocialIcons links={socialLinks} />
+          </div>
           <a
             href={`tel:${business.phone.replace(/\s+/g, "")}`}
             className="hidden rounded-full border border-brand-gold/40 px-4 py-2 text-sm text-brand-ivory transition hover:border-brand-gold hover:text-white sm:inline-flex"

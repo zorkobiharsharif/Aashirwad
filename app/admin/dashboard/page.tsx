@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 
 import { DeleteMediaButton } from "@/components/admin/delete-media-button";
 import { MediaUploadForm } from "@/components/admin/media-upload-form";
-import { getMediaAssets, getRecentInquiries } from "@/lib/cms";
+import { SocialLinksForm } from "@/components/admin/social-links-form";
+import { getMediaAssets, getRecentInquiries, getSocialLinks } from "@/lib/cms";
 import { isAdminAuthenticated } from "@/lib/auth";
 
 export default async function AdminDashboardPage() {
@@ -14,7 +15,8 @@ export default async function AdminDashboardPage() {
   }
 
   const inquiries = await getRecentInquiries();
-  const mediaItems = await getMediaAssets({ limit: 12 });
+  const mediaItems = await getMediaAssets({ limit: 12, useServiceRole: true });
+  const socialLinks = await getSocialLinks({ useServiceRole: true });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -81,14 +83,24 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
+          <div className="gold-border texture-panel rounded-[2rem] p-7">
+            <h2 className="font-serif text-3xl text-brand-ivory">Social links</h2>
+            <p className="mt-3 text-sm leading-7 text-brand-ivory/74">
+              Update the Instagram, Facebook, and Google Maps URLs used across the live website.
+            </p>
+            <div className="mt-6">
+              <SocialLinksForm initialLinks={socialLinks} />
+            </div>
+          </div>
+
           <div className="grid gap-6 lg:grid-cols-2">
             {[
-              ["Homepage", "Update hero copy, banners, quick highlights, and featured cards."],
-              ["Offers", "Add festive campaigns, wedding season updates, and limited offers."],
-              ["Reviews", "Store real customer testimonials and approve them before publishing."],
-              ["Blog", "Add local SEO articles, new arrivals posts, and seasonal content."],
-              ["Categories", "Maintain category descriptions, keywords, and cover images."],
-              ["Social Links", "Update Facebook, Instagram, and map links from one place."]
+              ["Homepage", "Homepage text editing is the next owner-portal upgrade."],
+              ["Offers", "Offer management form is the next owner-portal upgrade."],
+              ["Reviews", "Review management form is the next owner-portal upgrade."],
+              ["Blog", "Blog management form is the next owner-portal upgrade."],
+              ["Categories", "Category text and cover-image editing is the next owner-portal upgrade."],
+              ["Inquiries", "Recent customer inquiries are already visible on the right side."]
             ].map(([title, description]) => (
               <div key={title} className="rounded-[1.8rem] border border-white/10 bg-white/5 p-6">
                 <h3 className="font-serif text-2xl text-brand-ivory">{title}</h3>

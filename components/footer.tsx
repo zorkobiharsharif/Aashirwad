@@ -1,8 +1,12 @@
 import Link from "next/link";
 
+import { getSocialLinks } from "@/lib/cms";
 import { business, categories, locationPages } from "@/lib/site-data";
+import { SocialIcons } from "@/components/social-icons";
 
-export function Footer() {
+export async function Footer() {
+  const socialLinks = await getSocialLinks();
+
   return (
     <footer className="border-t border-brand-gold/20 bg-[#120d0c]">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-8">
@@ -13,17 +17,7 @@ export function Footer() {
             shirting, and suiting. Families also visit from Harnaut, Barbigha, Rajgir, Asthawan,
             Nalanda, Pawapuri, and Bhagan Bigha.
           </p>
-          <div className="flex flex-wrap gap-3 text-sm">
-            <a href={business.facebook} target="_blank" rel="noreferrer" className="text-brand-gold">
-              Facebook
-            </a>
-            <a href={business.instagram} target="_blank" rel="noreferrer" className="text-brand-gold">
-              Instagram
-            </a>
-            <a href={business.directionsUrl} target="_blank" rel="noreferrer" className="text-brand-gold">
-              Google Maps
-            </a>
-          </div>
+          <SocialIcons links={socialLinks} />
         </div>
 
         <div>

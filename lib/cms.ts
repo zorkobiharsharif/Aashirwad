@@ -88,8 +88,9 @@ export async function getMediaAssets(options?: {
   categorySlug?: string;
   limit?: number;
   includeInactive?: boolean;
+  useServiceRole?: boolean;
 }) {
-  const supabase = getSupabaseClient();
+  const supabase = getSupabaseClient(options?.useServiceRole);
   if (!supabase) return [];
 
   let query = supabase.from("media_assets").select("*").order("created_at", { ascending: false });
@@ -120,4 +121,36 @@ export async function getMediaAssets(options?: {
     usageType: String(item.usage_type || "gallery"),
     categorySlug: String(item.category_slug || "")
   }));
+}
+
+export async function getSocialLinks(options?: { useServiceRole?: boolean }) {
+  const supabase = getSupabaseClient(options?.useServiceRole);
+  const defaults = {
+    facebook: business.facebook,
+    instagram: business.instagram,
+    maps: business.directionsUrl
+  };
+
+  if (!supabase) return defaults;
+
+  const { data } = await supabase
+    .from("social_links")
+    .select("*")
+    .eq("is_active", true);
+
+  if (!data?.length) return defaults;
+
+  return data.reduce(
+    (acc, item) => {
+      const platform = String(item.platform || "").toLowerCase();
+      const url = String(item.url || "");
+
+      if (platform === "facebook" || platform === "instagram" || platform === "maps") {
+        acc[platform] = url || acc[platform];
+      }
+
+      return acc;
+    },
+    { ...defaults }
+  );
 }
